@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Garfield & Mochi 终极营养与通关计算器</title>
+<style>
+  :root {
+    --bg-color: #F8FAF7;
+    --card-bg: #FFFFFF;
+    --text-main: #1F2937;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --garfield-orange: #EA580C;
+    --mochi-pink: #DB2777;
+    --green-bg: #DEF7EC;
+    --green-text: #03543F;
+    --yellow-bg: #FEF08A;
+    --yellow-text: #854D0E;
+    --red-bg: #FDE8E8;
+    --red-text: #9B1C1C;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    padding: 14px;
+    max-width: 540px;
+    margin: 0 auto;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .header {
+    text-align: center;
+    padding: 10px 0 14px;
+  }
+  .header h1 {
+    font-size: 19px;
+    font-weight: 800;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .header p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+  .card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    border: 1px solid var(--border);
+  }
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+  .input-group label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #4B5563;
+    margin-bottom: 3px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .input-group label span {
+    color: #9CA3AF;
+    font-weight: normal;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    background: #FFFEFA;
+  }
+  .input-group input:focus {
+    outline: none;
+    border-color: #EA580C;
+    background: #FFFFFF;
+  }
+  .summary-banner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .banner-box {
+    background: #F3F4F6;
+    border-radius: 10px;
+    padding: 8px;
+    text-align: center;
+  }
+  .banner-box.gold { background: #FEF3C7; border: 1px solid #FCD34D; }
+  .banner-box.blue { background: #EFF6FF; border: 1px solid #BFDBFE; }
+  .banner-box .val { font-size: 18px; font-weight: 900; color: #1E293B; }
+  .banner-box .lbl { font-size: 11px; font-weight: 600; color: #64748B; }
+
+  .tab-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 9px;
+    font-size: 12.5px;
+    font-weight: 700;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: #F9FAFB;
+    color: #6B7280;
+    cursor: pointer;
+  }
+  .tab-btn.active.garfield {
+    background: #FFF7ED;
+    border-color: var(--garfield-orange);
+    color: var(--garfield-orange);
+  }
+  .tab-btn.active.mochi {
+    background: #FDF2F8;
+    border-color: var(--mochi-pink);
+    color: var(--mochi-pink);
+  }
+  .res-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .res-table th {
+    background: #F9FAFB;
+    color: #6B7280;
+    padding: 7px 6px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+  .res-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: middle;
+  }
+  .res-table td.val {
+    font-weight: 700;
+    text-align: right;
+    font-size: 13px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 10.5px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .badge-green { background: var(--green-bg); color: var(--green-text); }
+  .badge-yellow { background: var(--yellow-bg); color: var(--yellow-text); }
+  .badge-red { background: var(--red-bg); color: var(--red-text); }
+  .badge-gray { background: #E5E7EB; color: #4B5563; }
+
+  .verdict-box {
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .verdict-green { background: #ECFDF5; border: 1.5px solid #6EE7B7; color: #065F46; }
+  .verdict-yellow { background: #FEFCE8; border: 1.5px solid #FDE047; color: #854D0E; }
+  .verdict-red { background: #FEF2F2; border: 1.5px solid #FCA5A5; color: #991B1B; }
+
+  .blacklist-box {
+    background: #FFF5F5;
+    border: 1px dashed #FEB2B2;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: #9B1C1C;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🐾 Garfield & Mochi 营养通关判定仪</h1>
+  <p>依据 CTI 华测实测 & 2026 最新血液生化专宠定制</p>
+</div>
+
+<!-- Input Card -->
+<div class="card">
+  <div class="input-grid">
+    <div class="input-group">
+      <label>水分 Moisture (%) <span>必填</span></label>
+      <input type="number" id="in_moisture" step="0.1" placeholder="0" oninput="calculate()">
+    </div>
+    <div class="input-group">
+      <label>总磷 Phosphorus (%) <span>保肾核心</span></label>
+      <input type="number" id="in_phos" step="0.01" placeholder="0" oninput="calculate()">
+    </div>
+    <div class="input-group">
+      <label>钙 Calcium (%) <span>防结石核心</span></label>
+      <input type="number" id="in_cal" step="0.01" placeholder="0" oninput="calculate()">
+    </div>
+    <div class="input-group">
+      <label>粗灰分 Ash (%) <span>纯净度指标</span></label>
+      <input type="number" id="in_ash" step="0.1" placeholder="0" oninput="calculate()">
+    </div>
+    <div class="input-group">
+      <label>粗蛋白 Protein (%) <span>保肌肉</span></label>
+      <input type="number" id="in_protein" step="0.1" placeholder="0" oninput="calculate()">
+    </div>
+    <div class="input-group">
+      <label>粗脂肪 Fat (%) <span>体重管理</span></label>
+      <input type="number" id="in_fat" step="0.1" placeholder="0" oninput="calculate()">
+    </div>
+    <div class="input-group">
+      <label>粗纤维 Fiber (%) <span>肠道毛球</span></label>
+      <input type="number" id="in_fiber" step="0.1" placeholder="0" oninput="calculate()">
+    </div>
+    <div class="input-group">
+      <label>镁 Magnesium (%) <span>鸟粪石结石</span></label>
+      <input type="number" id="in_mg" step="0.001" placeholder="0" oninput="calculate()">
+    </div>
+  </div>
+
+  <div class="summary-banner">
+    <div class="banner-box gold">
+      <div class="val" id="out_dm">100.00%</div>
+      <div class="lbl">干物质总量 (Dry Matter)</div>
+    </div>
+    <div class="banner-box blue">
+      <div class="val" id="out_cap_ratio">-</div>
+      <div class="lbl">钙磷比 (Ca : P Ratio)</div>
+    </div>
+  </div>
+</div>
+
+<!-- Switch Tabs -->
+<div class="tab-row">
+  <button id="tab_garfield" class="tab-btn active garfield" onclick="switchCat('garfield')">
+    🐱 Garfield (16岁 CKD 1-2期)
+  </button>
+  <button id="tab_mochi" class="tab-btn mochi" onclick="switchCat('mochi')">
+    🐾 Mochi (2岁 高钙吸收成猫)
+  </button>
+</div>
+
+<!-- Result Card -->
+<div class="card" id="result_card">
+  <div id="cat_content"></div>
+</div>
+
+<script>
+let currentCat = 'garfield';
+
+function switchCat(cat) {
+  currentCat = cat;
+  document.getElementById('tab_garfield').classList.remove('active');
+  document.getElementById('tab_mochi').classList.remove('active');
+  if (cat === 'garfield') {
+    document.getElementById('tab_garfield').classList.add('active');
+  } else {
+    document.getElementById('tab_mochi').classList.add('active');
+  }
+  render();
+}
+
+let d = {};
+
+function calculate() {
+  const m = parseFloat(document.getElementById('in_moisture').value) || 0;
+  const dm = Math.max(0.1, 100 - m);
+  document.getElementById('out_dm').innerText = dm.toFixed(2) + '%';
+
+  const p_af = parseFloat(document.getElementById('in_phos').value) || 0;
+  const cal_af = parseFloat(document.getElementById('in_cal').value) || 0;
+  const a_af = parseFloat(document.getElementById('in_ash').value) || 0;
+  const prot_af = parseFloat(document.getElementById('in_protein').value) || 0;
+  const f_af = parseFloat(document.getElementById('in_fat').value) || 0;
+  const fib_af = parseFloat(document.getElementById('in_fiber').value) || 0;
+  const mg_af = parseFloat(document.getElementById('in_mg').value) || 0;
+
+  const carbs_af = Math.max(0, 100 - (m + prot_af + f_af + a_af + fib_af));
+
+  d = {
+    dm: dm,
+    phos: (p_af / dm) * 100,
+    cal: (cal_af / dm) * 100,
+    ash: (a_af / dm) * 100,
+    protein: (prot_af / dm) * 100,
+    fat: (f_af / dm) * 100,
+    carbs: (carbs_af / dm) * 100,
+    mg: (mg_af / dm) * 100,
+    capRatio: p_af > 0 ? (cal_af / p_af) : 0
+  };
+
+  document.getElementById('out_cap_ratio').innerText = d.capRatio > 0 ? (d.capRatio.toFixed(2) + ' : 1') : '-';
+  render();
+}
+
+function render() {
+  const c = document.getElementById('cat_content');
+  if (!d.dm) return;
+
+  if (currentCat === 'garfield') {
+    renderGarfield(c);
+  } else {
+    renderMochi(c);
+  }
+}
+
+function renderGarfield(c) {
+  let pBadge = 'badge-green', pTxt = '🟢 绿灯：可作主食每日喂';
+  if (d.phos > 1.0) { pBadge = 'badge-red'; pTxt = '🔴 红线：绝对禁止喂食'; }
+  else if (d.phos > 0.75) { pBadge = 'badge-yellow'; pTxt = '🟡 黄灯：仅作Topper 1-5g混食'; }
+
+  let cBadge = 'badge-green', cTxt = '🟢 范围正常 (需严核配料)';
+  if (d.cal > 1.2) { cBadge = 'badge-red'; cTxt = '🔴 偏高 (加重高血钙风险)'; }
+  else if (d.cal > 1.0) { cBadge = 'badge-yellow'; cTxt = '🟡 临界高值 (慎选)'; }
+
+  let aBadge = d.ash <= 10 ? 'badge-green' : 'badge-yellow';
+  let aTxt = d.ash <= 10 ? '🟢 优良 (<10%)' : '🟡 稍高 (肉质不够纯净)';
+
+  let prBadge = d.protein >= 35 ? 'badge-green' : 'badge-red';
+  let prTxt = d.protein >= 35 ? '🟢 达标 (防肌肉流失)' : '🔴 蛋白质过低 (加速虚弱)';
+
+  let html = `
+    <table class="res-table">
+      <thead>
+        <tr>
+          <th>核心指标</th>
+          <th style="text-align:right">DMB %</th>
+          <th style="text-align:right">Garfield 专属判定</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>总磷 (Phosphorus)</strong></td>
+          <td class="val" style="color:#B45309">${d.phos.toFixed(2)}%</td>
+          <td style="text-align:right"><span class="badge ${pBadge}">${pTxt}</span></td>
+        </tr>
+        <tr>
+          <td><strong>钙 (Calcium)</strong></td>
+          <td class="val">${d.cal.toFixed(2)}%</td>
+          <td style="text-align:right"><span class="badge ${cBadge}">${cTxt}</span></td>
+        </tr>
+        <tr>
+          <td><strong>粗蛋白质 (Protein)</strong></td>
+          <td class="val">${d.protein.toFixed(2)}%</td>
+          <td style="text-align:right"><span class="badge ${prBadge}">${prTxt}</span></td>
+        </tr>
+        <tr>
+          <td>粗灰分 (Crude Ash)</td>
+          <td class="val">${d.ash.toFixed(2)}%</td>
+          <td style="text-align:right"><span class="badge ${aBadge}">${aTxt}</span></td>
+        </tr>
+        <tr>
+          <td>碳水化合物 (Carbs)</td>
+          <td class="val">${d.carbs.toFixed(2)}%</td>
+          <td style="text-align:right"><span class="badge badge-gray">⚪ ${d.carbs < 15 ? '低碳友好' : '适中'}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+
+  if (d.phos <= 0.75) {
+    html += `
+      <div class="verdict-box verdict-green">
+        <strong>🟢 Garfield 临床裁决：通过！可作主食</strong><br>
+        • 总磷 <strong>${d.phos.toFixed(2)}% DM</strong> 牢牢压在 0.75% 肾脏生死线内。<br>
+        • 蛋白质 <strong>${d.protein.toFixed(1)}% DM</strong> 充足，能有力维持肌肉量。<br>
+        ⚠️ <strong>终审要求：</strong>确认配料表<strong>无鳕鱼肝油、无带骨肉、无化学磷酸盐</strong>。
+      </div>
+    `;
+  } else if (d.phos <= 1.0) {
+    const maxAdd85 = Math.max(1, Math.round(85 * (0.60 - 0.40) / (d.phos/100 - 0.60)));
+    html += `
+      <div class="verdict-box verdict-yellow">
+        <strong>🟡 Garfield 临床裁决：黄灯！仅限 Topper 或按比例混食</strong><br>
+        • 总磷 <strong>${d.phos.toFixed(2)}% DM</strong> 超过主食红线，单吃会增加肾脏排磷负担。<br>
+        • <strong>混合方案：</strong>每 85g 处方湿粮中，最多混入 <strong>${maxAdd85}g</strong> 该食物搅打；或每餐仅作为 1–5g 增香 Topper。
+      </div>
+    `;
+  } else {
+    html += `
+      <div class="verdict-box verdict-red">
+        <strong>🔴 Garfield 临床裁决：红线淘汰！绝对禁止喂食</strong><br>
+        • 总磷高达 <strong>${d.phos.toFixed(2)}% DM</strong> (> 1.0%)！哪怕吃少量也会直接导致肾小球高滤过损伤，推高血磷。
+      </div>
+    `;
+  }
+
+  html += `
+    <div class="blacklist-box">
+      <strong>🚫 Garfield 独有一票否决黑名单：</strong><br>
+      🔴 <strong>绝对禁止鳕鱼肝油 (Cod Liver Oil)：</strong>高浓缩维生素 D 会直接拉升血钙，加重其历史高血钙与软组织钙化危险！<br>
+      🔴 <strong>严禁骨骼来源钙与化学磷酸盐：</strong>带骨肉泥、骨粉、蛋壳粉、STPP、焦磷酸钠、磷酸三钙(TCP)。
+    </div>
+  `;
+  c.innerHTML = html;
+}
+
+function renderMochi(c) {
+  let aBadge = d.ash < 8.5 ? 'badge-green' : 'badge-red';
+  let aTxt = d.ash < 8.5 ? '🟢 绿灯：肉源纯净 (<8.5%)' : '🔴 红线：骨粉/杂质超标 (≥8.5%)';
+
+  let cBadge = 'badge-green', cTxt = '🟢 绿灯：放心喂 (<1.0%)';
+  if (d.cal >= 1.2) { cBadge = 'badge-red'; cTxt = '🔴 红线：单独喂禁止 (≥1.2%)'; }
+  else if (d.cal >= 1.0) { cBadge = 'badge-yellow'; cTxt = '🟡 黄灯：不宜作唯一主食'; }
+
+  let pBadge = 'badge-green', pTxt = '🟢 绿灯：健康成年标准 (0.9-1.5%)';
+  if (d.phos < 0.75) { pBadge = 'badge-red'; pTxt = '🔴 红线：过低！健康猫忌长期吃'; }
+  else if (d.phos > 1.5) { pBadge = 'badge-yellow'; pTxt = '🟡 黄灯：偏高需关注'; }
+
+  let prBadge = 'badge-green', prTxt = '🟢 优质高蛋白 (≥50%)';
+  if (d.protein < 40) { prBadge = 'badge-red'; prTxt = '🔴 蛋白质偏低 (<40%)'; }
+  else if (d.protein < 50) { prBadge = 'badge-yellow'; prTxt = '🟡 普通蛋白 (40-50%)'; }
+
+  let mgBadge = d.mg < 0.1 ? 'badge-green' : 'badge-red';
+  let mgTxt = d.mg < 0.1 ? '🟢 防结石达标 (<0.1%)' : '🔴 偏高 (诱发鸟粪石)';
+
+  let cbBadge = 'badge-green', cbTxt = '🟢 低碳优选 (<12%)';
+  if (d.carbs > 16) { cbBadge = 'badge-red'; cbTxt = '🔴 淀粉过高 (>16%)'; }
+  else if (d.carbs >= 12) { cbBadge = 'badge-yellow'; cbTxt = '🟡 适量 (干粮限量20g)'; }
+
+  let html = `
+    <table class="res-table">
+      <thead>
+        <tr>
+          <th>核心指标</th>
+          <th style="text-align:right">DMB %</th>
+          <th style="text-align:right">Mochi 专属判定</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>粗灰分 (Crude Ash)</strong></td>
+          <td class="val" style="color:#B45309">${d.ash.toFixed(2)}%</td>
+          <td style="text-align:right"><span class="badge ${aBadge}">${aTxt}</span></td>
+        </tr>
+        <tr>
+          <td><strong>钙 (Calcium)</strong></td>
+          <td class="val" style="color:#B45309">${d.cal.toFixed(2)}%</td>
+          <td style="text-align:right"><span class="badge ${cBadge}">${cTxt}</span></td>
+        </tr>
+        <tr>
+          <td><strong>总磷 (Phosphorus)</strong></td>
+          <td class="val">${d.phos.toFixed(2)}%</td>
+          <td style="text-align:right"><span class="badge ${pBadge}">${pTxt}</span></td>
+        </tr>
+        <tr>
+          <td><strong>粗蛋白质 (Protein)</strong></td>
+          <td class="val">${d.protein.toFixed(2)}%</td>
+          <td style="text-align:right"><span class="badge ${prBadge}">${prTxt}</span></td>
+        </tr>
+        <tr>
+          <td>镁 (Magnesium)</td>
+          <td class="val">${d.mg.toFixed(3)}%</td>
+          <td style="text-align:right"><span class="badge ${mgBadge}">${mgTxt}</span></td>
+        </tr>
+        <tr>
+          <td>淀粉/碳水 (Carbs)</td>
+          <td class="val">${d.carbs.toFixed(2)}%</td>
+          <td style="text-align:right"><span class="badge ${cbBadge}">${cbTxt}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+
+  if (d.ash < 8.5 && d.cal < 1.2 && d.phos >= 0.75 && d.phos <= 1.5) {
+    html += `
+      <div class="verdict-box verdict-green">
+        <strong>🌟 Mochi 临床裁决：全绿通关！放心喂食</strong><br>
+        • 灰分 <strong>${d.ash.toFixed(2)}%</strong> 纯净 (<8.5%)，钙 <strong>${d.cal.toFixed(2)}%</strong> 安全，全面阻断草酸钙结石！<br>
+        • 蛋白质 <strong>${d.protein.toFixed(1)}%</strong> 充足，帮助长结实肌肉改善体态。<br>
+        • 磷 <strong>${d.phos.toFixed(2)}%</strong> 符合健康成猫需求（非病理性低磷）。
+      </div>
+    `;
+  } else if (d.phos < 0.75) {
+    html += `
+      <div class="verdict-box verdict-red">
+        <strong>⚠️ Mochi 临床警示：严禁作为唯一主食！</strong><br>
+        • 该食物总磷仅 <strong>${d.phos.toFixed(2)}% DM</strong>，属于肾病处方粮级别。<br>
+        • Mochi 肾脏极度健康 (SDMA 12)，长期喂食低磷粮会导致肌肉分解萎缩与营养不良！
+      </div>
+    `;
+  } else if (d.cal >= 1.2 || d.ash >= 8.5) {
+    html += `
+      <div class="verdict-box verdict-red">
+        <strong>🔴 Mochi 临床裁决：高结石风险！禁止单独作主食</strong><br>
+        • ${d.ash >= 8.5 ? `灰分超标 (${d.ash.toFixed(2)}% ≥ 8.5%)，存在隐形骨粉；` : ''}
+        ${d.cal >= 1.2 ? `钙超标 (${d.cal.toFixed(2)}% ≥ 1.2%)，易诱发草酸钙结石！` : ''}<br>
+        • <strong>混合条件：</strong>若为干粮，仅在<strong>每日 ≤ 20g</strong> 且搭配低钙湿粮时酌情使用。
+      </div>
+    `;
+  } else {
+    html += `
+      <div class="verdict-box verdict-yellow">
+        <strong>🟡 Mochi 临床裁决：黄灯观察，建议搭配喂食</strong><br>
+        指标处于临界区间，不建议作为唯一主食长期喂，可与全绿主食交替轮换。
+      </div>
+    `;
+  }
+
+  html += `
+    <div class="blacklist-box">
+      <strong>🚫 Mochi 防结石一票否决黑名单：</strong><br>
+      🔴 <strong>隐形骨头陷阱：</strong>带骨肉泥、白条鸡/整禽、骨粉骨泥、蛋壳粉。<br>
+      🔴 <strong>化学矿物质添加剂：</strong>三聚磷酸钠(STPP)、焦磷酸钠、磷酸三钙(TCP)、磷酸氢钙(DCP)。
+    </div>
+  `;
+  c.innerHTML = html;
+}
+
+calculate();
+</script>
+
+</body>
+</html>
