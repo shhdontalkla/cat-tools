@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Garfield's Phos-Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #fff8f0; }
+        input[type="number"] { font-size: 1.25rem; } /* Large text for mobile typing */
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-sm bg-white rounded-3xl shadow-2xl border-4 border-orange-100 overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-orange-500 p-6 text-center text-white relative">
+            <h1 class="text-2xl font-extrabold tracking-tight">Garfield's Calculator 🐱</h1>
+            <p class="text-orange-100 text-sm mt-1 font-medium">Safe Kidney Mixing</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+            
+            <!-- Large Mobile Inputs -->
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Prescription Diet Weight (g)</label>
+                    <input type="number" id="renalWeight" value="85" 
+                        class="w-full p-4 bg-orange-50 border-2 border-orange-200 rounded-2xl focus:border-orange-500 focus:ring-0 text-center font-bold text-gray-800 transition-colors">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Prescription Phosphorus (DM%)</label>
+                    <input type="number" id="renalPhos" value="0.40" step="0.01" 
+                        class="w-full p-4 bg-orange-50 border-2 border-orange-200 rounded-2xl focus:border-orange-500 focus:ring-0 text-center font-bold text-gray-800 transition-colors">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Regular Diet Phosphorus (DM%)</label>
+                    <input type="number" id="regularPhos" value="0.98" step="0.01" 
+                        class="w-full p-4 bg-orange-50 border-2 border-orange-200 rounded-2xl focus:border-orange-500 focus:ring-0 text-center font-bold text-gray-800 transition-colors">
+                </div>
+            </div>
+
+            <hr class="border-orange-100 border-2 rounded-full">
+
+            <!-- Big Results Display -->
+            <div class="space-y-4">
+                
+                <!-- Strict Goal -->
+                <div class="bg-green-100 rounded-2xl p-5 text-center shadow-inner border border-green-200">
+                    <p class="text-green-800 font-bold text-sm uppercase tracking-wide">Strict Goal (0.60%)</p>
+                    <p class="text-xs text-green-700 mb-1">Max Add:</p>
+                    <div class="text-4xl font-extrabold text-green-600" id="strictResult">--</div>
+                </div>
+
+                <!-- Safe Goal -->
+                <div class="bg-yellow-100 rounded-2xl p-5 text-center shadow-inner border border-yellow-200">
+                    <p class="text-yellow-800 font-bold text-sm uppercase tracking-wide">Safe Goal (0.75%)</p>
+                    <p class="text-xs text-yellow-700 mb-1">Max Add:</p>
+                    <div class="text-4xl font-extrabold text-yellow-600" id="safeResult">--</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const elRenalWeight = document.getElementById('renalWeight');
+        const elRenalPhos = document.getElementById('renalPhos');
+        const elRegularPhos = document.getElementById('regularPhos');
+        
+        const elStrictResult = document.getElementById('strictResult');
+        const elSafeResult = document.getElementById('safeResult');
+
+        function calculate() {
+            const w = parseFloat(elRenalWeight.value);
+            const rPhos = parseFloat(elRenalPhos.value);
+            const regPhos = parseFloat(elRegularPhos.value);
+
+            if (isNaN(w) || isNaN(rPhos) || isNaN(regPhos)) {
+                elStrictResult.innerText = "--";
+                elSafeResult.innerText = "--";
+                return;
+            }
+
+            // Function to calculate based on target
+            function getAddAmount(target) {
+                if (rPhos >= target) return "0 g"; // Renal food is already over target
+                if (regPhos <= target) return "Unlimited!";
+                
+                const maxAdd = w * (target - rPhos) / (regPhos - target);
+                
+                if (maxAdd < 0) return "0 g";
+                return Math.round(maxAdd) + " g"; // Rounded to whole number
+            }
+
+            elStrictResult.innerText = getAddAmount(0.60);
+            elSafeResult.innerText = getAddAmount(0.75);
+        }
+
+        // Listeners for auto-update
+        elRenalWeight.addEventListener('input', calculate);
+        elRenalPhos.addEventListener('input', calculate);
+        elRegularPhos.addEventListener('input', calculate);
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>
